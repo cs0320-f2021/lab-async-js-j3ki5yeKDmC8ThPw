@@ -6,25 +6,53 @@
 //TODO: select the list where the suggestions should go, the input box where we're typing, and
 // the loading text
 //HINT: look at the hTML
-const suggestionList = _;
-const input = _;
-const loading = _;
+const suggestionList = document.getElementById("suggestions");
+const input = document.getElementById("autocorrect-input");
+const loading = document.getElementById("loading");
 
 input.addEventListener("keyup", () => {
   //TODO: empty the suggestionList (you want new suggestions each time someone types something
   // new, hint, use .innerHTML)
+  suggestionList.innerHTML = "";
   // TODO: show the loading text (HINT: set value of loading.style.display to "block" or "")
+  loading.style.display = "";
 
   const postParameters = {
     //TODO: get the text inside the input box (hint: use input.value to get the value of the input field)
-    text: _
+    text: input.value
   };
 
   //TODO: make a post request to the url to handle this request you set in your Main.java
   //HINT: check out the GET, POST, and JSON section of the lab
+  let response = fetch("/results", {
+    method: 'post',
+    body: JSON.stringify(postParameters),
+    headers: {
+      'Content-type': 'application/json; charset = UTF-8',
+    },
+  })
 
   //TODO: Parse the JSON in the response object
   //HINT: remember to get the specific field in the JSON you want to use
+  let jsonResponse = response.then((promise) =>
+  {
+    return promise.json()
+  })
+
+  jsonResponse.then((suggestionsObject) => {
+    let results = suggestionsObject.suggestions
+    for(let i=0; i < results.length; i++) {
+      suggestionList.innerHTML += "<li tabindex = '0'" + results[i] + "</li>"
+    }
+    let tagList = document.getElementsByTagName("li")
+    for (let t of tagList) {
+      t.addEventListener('click', (e) => {
+        input.value = e.target.innerHTML
+      })
+    }
+    loading.style.display = ""
+
+  })
 
   //TODO: for each element in the set of results, append it to the suggestionList
   //HINT: use innerHTML += to append to teh suggestions list
